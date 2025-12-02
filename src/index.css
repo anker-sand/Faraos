@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expandLeft {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 300px;
+    opacity: 1;
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-in-out forwards;
+}
+
+.animate-expand-left {
+  animation: expandLeft 0.4s ease-in-out forwards;
+}
+
+.hover-underline {
+  position: relative;
+}
+
+.hover-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.3s ease-out;
+}
+
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* Group hover support for title underline */
+.group\/title:hover .hover-underline::after {
+  width: 100%;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 6px;
+  border: 2px solid #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #404040 #0a0a0a;
+}
+
+/* Utility to fully hide scrollbars cross-browser */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom checkbox styling */
+.f-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #3d3d3d;
+  background: #121212;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.f-checkbox:hover {
+  border-color: #555;
+}
+.f-checkbox:checked {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+.f-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' stroke='white' stroke-width='2' fill='none' viewBox='0 0 12 12'><path d='M2 6l2.5 3L10 3'/></svg>")
+    center/contain no-repeat;
+}
+.f-checkbox:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Button-like category styling helper */
+.cat-btn-active {
+  background: linear-gradient(145deg, #1d1d1d, #121212);
+  border: 1px solid #16a34a;
+}
+.cat-btn-base {
+  background: linear-gradient(145deg, #141414, #101010);
+  border: 1px solid #262626;
+}
