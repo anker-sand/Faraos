@@ -27,7 +27,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="bg-neutral-950">
+    <div className="bg-faraos-bg">
       {/* Fixed Hero Carousel */}
       <div className="fixed top-0 left-0 w-full h-[70vh] z-30">
         <Slider slides={slides} />
@@ -38,7 +38,7 @@ const Home = () => {
         {/* Transparent spacer - allows clicks through to carousel */}
         <div className="h-[60vh] relative z-0" />
 
-        <section className="w-full pt-10 pb-10 relative z-40 bg-neutral-950 ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
+        <section className="w-full pt-10 pb-10 relative z-40 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
           <div className="px-8 mb-6 flex flex-col items-center text-center">
             <h2 className="text-4xl md:text-5xl font-geist font-bold tracking-tight">
               NYHEDER
@@ -121,7 +121,7 @@ const Home = () => {
         </section>
 
         {/* Categories section */}
-        <section className="w-full pt-8 pb-12 relative z-40 bg-neutral-950 ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
+        <section className="w-full pt-8 pb-12 relative z-40 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
           <div className="px-8 mb-6 flex flex-col items-center text-center">
             <h2 className="text-4xl md:text-5xl font-geist font-bold tracking-tight">
               KATEGORIER

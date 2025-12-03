@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --color-faraos-bg: #0a0a0a;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
