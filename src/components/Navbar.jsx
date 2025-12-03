@@ -135,8 +135,8 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="w-full absolute top-0 left-0 bg-transparent relative z-50">
-      <div className="flex items-center justify-between p-6 pl-12 pt-8 relative z-50">
+    <nav className="w-full fixed top-0 left-0 backdrop-blur-xl bg-neutral-950/50 relative z-[200]">
+      <div className="flex items-center justify-between p-6 pl-12 relative">
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center" aria-label="Go to home">
             <img
@@ -151,7 +151,7 @@ const Navbar = () => {
           {categories.map((category) => (
             <div
               key={category.name}
-              className="relative z-20"
+              className="relative"
               onMouseEnter={(e) => {
                 setOpenCategory(category.name);
                 const rect = e.currentTarget.getBoundingClientRect();
@@ -164,22 +164,52 @@ const Navbar = () => {
                   openCategory === category.name
                     ? "text-red-500"
                     : "hover:text-red-500"
-                } hover-underline`}
+                } hover-underline hover-underline-full`}
               >
                 {category.name}
                 {category.icon}
               </button>
+
+              {openCategory === category.name && (
+                <div className="absolute top-full left-0 w-full backdrop-blur-xl shadow-md">
+                  <ul className="font-geist text-lg text-neutral-200 space-y-2 py-4 px-6">
+                    {category.subcategories.map((sub) => (
+                      <li key={sub.path}>
+                        <NavLink
+                          to={sub.path}
+                          className="block px-2 py-1 hover:text-white"
+                          onClick={() => setOpenCategory(null)}
+                        >
+                          {sub.name}
+                        </NavLink>
+                      </li>
+                    ))}
+                    <li className="pt-2">
+                      <NavLink
+                        to={category.path}
+                        className="block px-2 py-1 underline underline-offset-4 hover:text-white"
+                        onClick={() => setOpenCategory(null)}
+                      >
+                        Se alle
+                      </NavLink>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           ))}
 
           <NavLink
             to="/klub-faraos"
-            className="px-6 py-3 font-geist font-bold text-lg hover-underline hover:text-red-500 transition-colors"
+            className="px-6 py-3 font-geist font-bold text-lg hover-underline hover-underline-full hover:text-red-500 transition-colors"
           >
             KLUB FARAOS
           </NavLink>
 
-          <NavLink to="/account" className="p-3 hover-underline">
+          <NavLink
+            to="/account"
+            className="p-3 hover-underline hover-underline-full"
+          >
             <svg
               className="w-7 h-7"
               fill="none"
@@ -195,7 +225,10 @@ const Navbar = () => {
             </svg>
           </NavLink>
 
-          <NavLink to="/cart" className="p-3 hover-underline">
+          <NavLink
+            to="/cart"
+            className="p-3 hover-underline hover-underline-full"
+          >
             <svg
               className="w-7 h-7"
               fill="none"
@@ -212,45 +245,6 @@ const Navbar = () => {
           </NavLink>
         </div>
       </div>
-
-      {openCategory && anchorRect && (
-        <div
-          className="fixed z-40"
-          style={{
-            top: Math.round(anchorRect.bottom + 2),
-            left: Math.round(anchorRect.left + anchorRect.width / 2),
-            transform: "translateX(-50%)",
-          }}
-          onMouseLeave={() => setOpenCategory(null)}
-        >
-          <ul className="font-geist text-lg text-neutral-200 space-y-2 py-2">
-            {categories
-              .find((c) => c.name === openCategory)
-              ?.subcategories.map((sub) => (
-                <li key={sub.path}>
-                  <NavLink
-                    to={sub.path}
-                    className="px-2 py-1 hover:text-white"
-                    onClick={() => setOpenCategory(null)}
-                  >
-                    {sub.name}
-                  </NavLink>
-                </li>
-              ))}
-            <li className="pt-2">
-              <NavLink
-                to={
-                  categories.find((c) => c.name === openCategory)?.path || "/"
-                }
-                className="px-2 py-1 underline underline-offset-4 hover:text-white"
-                onClick={() => setOpenCategory(null)}
-              >
-                Se alle
-              </NavLink>
-            </li>
-          </ul>
-        </div>
-      )}
     </nav>
   );
 };

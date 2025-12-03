@@ -58,7 +58,7 @@ const Slider = ({
   });
 
   return (
-    <div className="relative w-full h-[70vh] overflow-hidden">
+    <div className="w-full h-[70vh] overflow-hidden">
       {/* Slides */}
       <div
         className="flex transition-transform duration-600 ease-out h-full"
@@ -81,7 +81,7 @@ const Slider = ({
               draggable="false"
             />
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-950/55 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/55 to-transparent" />
             </div>
             {/* Content (overlay) */}
@@ -98,50 +98,9 @@ const Slider = ({
           </div>
         ))}
       </div>
-      {/* Navigation bottom-right (raised within visible hero area) */}
-      <div className="absolute bottom-16 right-8 z-50 flex gap-3">
-        <button
-          onClick={prevSlide}
-          className="w-11 h-11 flex items-center justify-center rounded-full bg-neutral-900/90 hover:bg-neutral-800 transition shadow ring-1 ring-neutral-700 text-white"
-          aria-label="Previous slide"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={nextSlide}
-          className="w-11 h-11 flex items-center justify-center rounded-full bg-neutral-900/90 hover:bg-neutral-800 transition shadow ring-1 ring-neutral-700 text-white"
-          aria-label="Next slide"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
 
       {/* Indicators & Progress */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
         <div className="flex gap-2">
           {slides.map((_, index) => (
             <button
@@ -156,14 +115,7 @@ const Slider = ({
             />
           ))}
         </div>
-        {auto && (
-          <div className="w-72 h-2 bg-neutral-700/60 rounded overflow-hidden">
-            <div
-              className="h-full bg-neutral-200 transition-[width] duration-300"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-        )}
+        {auto && <div className="hidden" />}
       </div>
     </div>
   );
