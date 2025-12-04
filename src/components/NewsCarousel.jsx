@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import { NavLink } from "react-router";
 
 // Scroll-based infinite carousel with manual cancellable smooth scroll to avoid twitching.
 const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
@@ -13,6 +14,7 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
   const [cardWidth, setCardWidth] = useState(0);
   const [centerRawIndex, setCenterRawIndex] = useState(initialRaw);
   const [ready, setReady] = useState(false);
+  const [activeTab, setActiveTab] = useState("news"); // "popular" | "news" | "bestsellers"
 
   const PEEK = 56;
   const GAP = 28; // slightly larger space between cards
@@ -148,8 +150,11 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
     if (!vp) return;
     let startX = 0;
     let startScroll = 0;
+    let moved = 0;
+    const DRAG_THRESHOLD = 6; // pixels to treat as real drag
     const onPointerDown = (e) => {
       stateRef.current.dragging = true;
+      moved = 0;
       if (
         animRef.current.active &&
         typeof animRef.current.cancel === "function"
@@ -164,14 +169,20 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
     const onPointerMove = (e) => {
       if (!stateRef.current.dragging) return;
       const dx = e.clientX - startX;
-      vp.scrollLeft = startScroll - dx;
+      moved = Math.max(moved, Math.abs(dx));
+      if (moved >= DRAG_THRESHOLD) {
+        vp.scrollLeft = startScroll - dx;
+      }
     };
     const endDrag = (e) => {
       if (!stateRef.current.dragging) return;
       vp.releasePointerCapture(e.pointerId);
+      const wasDrag = moved >= DRAG_THRESHOLD;
       stateRef.current.dragging = false;
       vp.style.scrollBehavior = "";
-      snapToNearest();
+      if (wasDrag) {
+        snapToNearest();
+      }
     };
     vp.addEventListener("pointerdown", onPointerDown);
     vp.addEventListener("pointermove", onPointerMove);
@@ -233,24 +244,73 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
     setCenterRawIndex(normalized);
   };
 
-  const handleCardClick = (rawIdx) => {
-    if (rawIdx === centerRawIndex) {
-      if (typeof onItemClick === "function" && originalLength) {
-        onItemClick(
-          items[centerRawIndex % originalLength],
-          centerRawIndex % originalLength
-        );
-      }
-      return;
-    }
-    centerSmoothTo(rawIdx);
-  };
+  // Click-to-center disabled per request; dragging remains the primary interaction.
+  const handleCardClick = null;
 
   const goPrev = () => centerSmoothTo(centerRawIndex - 1);
   const goNext = () => centerSmoothTo(centerRawIndex + 1);
 
   return (
     <div className="w-full relative select-none">
+      {/* Section headings with 'Se alle' aligned right */}
+      <div className="w-full relative mb-1">
+        <div className="flex items-center justify-center gap-10">
+          <button
+            type="button"
+            onClick={() => setActiveTab("popular")}
+            className={
+              "font-geist font-bold text-2xl md:text-3xl tracking-wide transition-colors " +
+              (activeTab === "popular"
+                ? "text-white"
+                : "text-neutral-400 hover:text-neutral-200")
+            }
+          >
+            POPULÆRE NU
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("news")}
+            className={
+              "font-geist font-bold text-2xl md:text-3xl tracking-wide transition-colors " +
+              (activeTab === "news"
+                ? "text-white"
+                : "text-neutral-400 hover:text-neutral-200")
+            }
+          >
+            NYHEDER
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("bestsellers")}
+            className={
+              "font-geist font-bold text-2xl md:text-3xl tracking-wide transition-colors " +
+              (activeTab === "bestsellers"
+                ? "text-white"
+                : "text-neutral-400 hover:text-neutral-200")
+            }
+          >
+            BESTSELLERS
+          </button>
+        </div>
+        <div className="absolute right-8 top-1">
+          <NavLink
+            to={
+              activeTab === "popular"
+                ? "/populaere"
+                : activeTab === "bestsellers"
+                ? "/bestsellers"
+                : "/nyheder"
+            }
+            className="text-sm md:text-base font-geist text-neutral-300 hover:text-white hover-underline"
+          >
+            {activeTab === "popular"
+              ? "Se alle populære"
+              : activeTab === "bestsellers"
+              ? "Se alle bestsellers"
+              : "Se alle nyheder"}
+          </NavLink>
+        </div>
+      </div>
       <div
         ref={viewportRef}
         className="w-full overflow-x-scroll overflow-y-visible no-scrollbar py-4"
@@ -271,9 +331,9 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
                     "opacity 220ms, transform 260ms cubic-bezier(.25,.6,.3,1)",
                   opacity,
                   transform: `scale(${scale})`,
-                  cursor: "pointer",
+                  cursor: "default",
                 }}
-                onClick={() => handleCardClick(idx)}
+                // Click disabled: do not center on click
               >
                 <div
                   className={

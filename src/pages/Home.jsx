@@ -34,17 +34,6 @@ const Home = () => {
 
       {/* Scrollable Content */}
       <section className="w-full pt-10 pb-10 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
-        <div className="px-8 mb-6 flex flex-col items-center text-center">
-          <h2 className="text-4xl md:text-5xl font-geist font-bold tracking-tight">
-            NYHEDER
-          </h2>
-          <NavLink
-            to="/nyheder"
-            className="mt-2 text-sm font-geist text-neutral-300 hover:text-white underline underline-offset-4"
-          >
-            Se alle nyheder
-          </NavLink>
-        </div>
         <NewsCarousel
           items={[
             {
