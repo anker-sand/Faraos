@@ -317,9 +317,7 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
             ? items[centerRawIndex % originalLength]?.title || ""
             : ""}
         </h3>
-        <button className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-geist font-semibold text-sm rounded-lg transition-colors shadow-lg hover:shadow-xl whitespace-nowrap">
-          Se mere
-        </button>
+        {/* Se mere button hidden per request */}
         <div className="flex items-center justify-center gap-8 font-geist text-lg">
           <button
             onClick={goPrev}

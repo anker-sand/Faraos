@@ -4,7 +4,7 @@ const Slider = ({
   slides = [],
   onSlideClick,
   auto = true,
-  interval = 6000,
+  interval = 999999,
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [progress, setProgress] = useState(0);
