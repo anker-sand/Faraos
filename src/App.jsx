@@ -7,7 +7,7 @@ import OldMegaMenuNavbar from "./pages/OldMegaMenuNavbar.jsx";
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="min-h-screen bg-faraos-bg text-neutral-100">
         <Navbar />
         <main>
