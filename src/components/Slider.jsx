@@ -77,7 +77,7 @@ const Slider = ({
             <img
               src={slide.image}
               alt={slide.title}
-              className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(.25,.6,.3,1)] group-hover:scale-[1.05]"
+              className="absolute inset-0 w-full h-full object-cover object-[50%_-5%] transition-transform duration-700 ease-[cubic-bezier(.25,.6,.3,1)] group-hover:scale-[1.05]"
               draggable="false"
             />
             <div className="absolute inset-0 pointer-events-none">

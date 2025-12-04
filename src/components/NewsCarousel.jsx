@@ -253,7 +253,7 @@ const NewsCarousel = ({ items = [], initialIndex = 0, onItemClick }) => {
   return (
     <div className="w-full relative select-none">
       {/* Section headings with 'Se alle' aligned right */}
-      <div className="w-full relative mb-1">
+      <div className="w-full relative mb-6">
         <div className="flex items-center justify-center gap-10">
           <button
             type="button"

@@ -8,7 +8,7 @@ const Home = () => {
   const slides = [
     {
       id: 1,
-      image: "src/assets/img/ddcollection.png",
+      image: "src/assets/img/ddevilred.jpg",
       title: "DAREDEVIL COLLECTION 1993",
       description: "Den orignale trilogi af Frank Miller",
     },
