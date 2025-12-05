@@ -42,7 +42,7 @@ const Home = () => {
 
   return (
     <div className="bg-faraos-bg">
-      <section className="w-full h-[70vh] relative -mt-[160px] bg-faraos-bg">
+      <section className="w-full h-[70vh] relative bg-faraos-bg">
         <Slider slides={slides} />
       </section>
 
