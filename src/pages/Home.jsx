@@ -4,17 +4,31 @@ import Slider from "../components/Slider.jsx";
 import NewsCarousel from "../components/NewsCarousel.jsx";
 import CategoryCarousel from "../components/CategoryCarousel.jsx";
 
+// Import assets so Vite bundles and rewrites URLs
+import ddevilRed from "../assets/img/ddevilred.jpg";
+import dragerDaemoner from "../assets/img/DragerDaemoner_web_1.jpg";
+
+import womanWithoutFear from "../assets/img/comics/womanwithoutfear.jpg";
+import hildaTwig from "../assets/img/comics/hildatwig.jpg";
+import milesMorales from "../assets/img/comics/milesmorales.jpg";
+import starwars from "../assets/img/comics/starwars.jpg";
+import shadowCrane from "../assets/img/comics/shadowcrane.jpg";
+import minorArcana from "../assets/img/comics/minorarcana.jpg";
+import graensebyen from "../assets/img/comics/graensebyen.jpg";
+import alva from "../assets/img/comics/alva.jpg";
+import superman from "../assets/img/comics/superman.jpg";
+
 const Home = () => {
   const slides = [
     {
       id: 1,
-      image: "src/assets/img/ddevilred.jpg",
+      image: ddevilRed,
       title: "DAREDEVIL COLLECTION 1993",
       description: "Den orignale trilogi af Frank Miller",
     },
     {
       id: 2,
-      image: "src/assets/img/DragerDaemoner_web_1.jpg",
+      image: dragerDaemoner,
       title: "Drager og Dæmoner",
       description: "Game night essentials",
     },
@@ -37,63 +51,63 @@ const Home = () => {
         <NewsCarousel
           items={[
             {
-              image: "src/assets/img/comics/womanwithoutfear.jpg",
+              image: womanWithoutFear,
               title: "Daredevil by Chip Zdarsky vol. 6: Doing Time Pt One",
               author: "Chip Zdarsky & Marco Checchetto",
               price: 159,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/hildatwig.jpg",
+              image: hildaTwig,
               title: "Hilda And Twig Wake the Ice Man",
               author: "Luke Pearson",
               price: 179,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/milesmorales.jpg",
+              image: milesMorales,
               title: "Saga Vol. 1",
               author: "Brian K. Vaughan & Fiona Staples",
               price: 129,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/starwars.jpg",
+              image: starwars,
               title: "Star Wars Legends Old Republic Omnibus vol. 2",
               author: "Benjamin Carre & Alex Sanchez",
               price: 349,
               stock: "Kun få tilbage",
             },
             {
-              image: "src/assets/img/comics/shadowcrane.jpg",
+              image: shadowCrane,
               title: "Shadow of the Golden Crane",
               author: "Mike Mignola",
               price: 249,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/minorarcana.jpg",
+              image: minorArcana,
               title: "Spider-Gwen: Ghost-Spider Vol. 1",
               author: "Seanan McGuire",
               price: 149,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/graensebyen.jpg",
+              image: graensebyen,
               title: "Old Man Logan 2: Grænsebyen",
               author: "Jeff Lemire & Andrea Sorrentino",
               price: 168,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/alva.jpg",
+              image: alva,
               title: "Hellboy: Seed of Destruction",
               author: "Mike Mignola",
               price: 169,
               stock: "På lager",
             },
             {
-              image: "src/assets/img/comics/superman.jpg",
+              image: superman,
               title: "Watchmen (Deluxe Edition)",
               author: "Alan Moore & Dave Gibbons",
               price: 299,
@@ -122,32 +136,32 @@ const Home = () => {
             categories={[
               {
                 title: "Comics",
-                image: "src/assets/img/comics/womanwithoutfear.jpg",
+                image: womanWithoutFear,
               },
               {
                 title: "Graphic Novels",
-                image: "src/assets/img/comics/milesmorales.jpg",
+                image: milesMorales,
               },
               {
                 title: "Manga",
-                image: "src/assets/img/comics/hildatwig.jpg",
+                image: hildaTwig,
               },
               {
                 title: "Fantasy",
-                image: "src/assets/img/comics/starwars.jpg",
+                image: starwars,
               },
               {
                 title: "Sci-Fi",
-                image: "src/assets/img/comics/shadowcrane.jpg",
+                image: shadowCrane,
               },
               {
                 title: "Superheroes",
-                image: "src/assets/img/comics/superman.jpg",
+                image: superman,
               },
-              { title: "Horror", image: "src/assets/img/comics/alva.jpg" },
+              { title: "Horror", image: alva },
               {
                 title: "Classics",
-                image: "src/assets/img/comics/graensebyen.jpg",
+                image: graensebyen,
               },
             ]}
           />
