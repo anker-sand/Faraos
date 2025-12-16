@@ -82,7 +82,15 @@ const AdminPage = () => {
               ? null
               : Number(data.stockCount) || null;
           const isbn13 = data.isbn13 ?? "";
-          const genres = Array.isArray(data.genres) ? data.genres : [];
+          // Normalize genres: support both 'genres' (array) and 'genre' (string/array)
+          let genres = [];
+          if (Array.isArray(data.genres)) {
+            genres = data.genres;
+          } else if (typeof data.genre === "string" && data.genre.trim()) {
+            genres = [data.genre.trim()];
+          } else if (Array.isArray(data.genre)) {
+            genres = data.genre;
+          }
           return {
             id: d.id,
             title,
@@ -169,7 +177,7 @@ const AdminPage = () => {
           ? null
           : Number(form.stockCount) || 0,
       isbn13: form.isbn13 || "",
-      genres: form.genres || [],
+      genres: (form.genres || []).map((g) => g.trim()).filter(Boolean),
       isActive: !!form.isActive,
       createdAt: Date.now(),
     };

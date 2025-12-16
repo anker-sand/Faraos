@@ -312,17 +312,13 @@ const ComicsStore = () => {
     }
 
     if (genres.size) {
-      const gset = new Set(Array.from(genres).map((g) => g.toLowerCase()));
-      list = list.filter((p) => {
-        const sub = (p.subcategory || "").toLowerCase();
-        return (
-          gset.has(sub) ||
-          (gset.has("superhero") &&
-            ["daredevil", "batman", "spider-man", "superman"].some((s) =>
-              sub.includes(s)
-            ))
-        );
-      });
+      // Genre filter: match Firestore product genres array
+      const selected = new Set(Array.from(genres).map((g) => g.toLowerCase()));
+      list = list.filter((p) =>
+        (p.genres || []).some((g) =>
+          selected.has(String(g).trim().toLowerCase())
+        )
+      );
     }
 
     // Author filter
