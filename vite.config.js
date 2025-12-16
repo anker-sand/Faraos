@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/Faraos/',
+  base: "/Faraos/",
   plugins: [react(), tailwindcss()],
   safelist: [
     "bg-neutral-950",
