@@ -225,8 +225,19 @@ const ComicsStore = () => {
           else if (language === "Dansk") category = "DK comics";
           else if (language) category = "US comics";
 
+          // Normalize genres: support both 'genres' (array) and 'genre' (string/array)
+          let genres = [];
+          if (Array.isArray(data.genres)) {
+            genres = data.genres;
+          } else if (typeof data.genre === "string" && data.genre.trim()) {
+            genres = [data.genre.trim()];
+          } else if (Array.isArray(data.genre)) {
+            genres = data.genre;
+          }
           return {
+            ...data,
             id: d.id,
+            genres,
             image,
             title: title.toString().trim(),
             price:
