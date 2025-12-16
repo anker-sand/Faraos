@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:docs": "vite build --outDir docs && copy docs\\index.html docs\\404.html"
+    "build:docs": "vite build --outDir docs && copy docs\\index.html docs\\404.html",
+    "deploy": "npm run build && rmdir /s /q docs && move dist docs && git add docs && git commit -m \"Deploy to GitHub Pages\" && git push"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
