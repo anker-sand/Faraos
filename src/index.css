@@ -139,12 +139,3 @@ body {
   background: linear-gradient(145deg, #141414, #101010);
   border: 1px solid #262626;
 }
-
-html {
-  transform: scale(0.8); /* Scale the entire site to 80% */
-  transform-origin: top left; /* Ensure scaling starts from the top left */
-}
-
-body {
-  overflow-x: hidden; /* Prevent horizontal overflow caused by scaling */
-}
