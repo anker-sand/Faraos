@@ -4,8 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  // For Vercel, use base: "" to deploy at root
-  base: "",
+  base: "/",
   plugins: [react(), tailwindcss()],
   safelist: [
     "bg-neutral-950",
