@@ -4,7 +4,6 @@ import Daredevil from "./pages/Daredevil.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ComicsStore from "./pages/ComicsStore.jsx";
 import OldMegaMenuNavbar from "./pages/OldMegaMenuNavbar.jsx";
-import AdminPage from "./pages/AdminPage.jsx";
 
 const App = () => {
   return (
@@ -16,7 +15,6 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/daredevil" element={<Daredevil />} />
             <Route path="/comics" element={<ComicsStore />} />
-            <Route path="/admin" element={<AdminPage />} />
             <Route path="/oldmegamenunavbar" element={<OldMegaMenuNavbar />} />
           </Routes>
         </main>
