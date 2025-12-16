@@ -3,6 +3,8 @@ import { NavLink } from "react-router";
 import Slider from "../components/Slider.jsx";
 import NewsCarousel from "../components/NewsCarousel.jsx";
 import CategoryCarousel from "../components/CategoryCarousel.jsx";
+import ProductRow from "../components/ProductRow.jsx";
+import HeroLead from "../components/HeroLead.jsx";
 
 // Import assets so Vite bundles and rewrites URLs
 import ddevilRed from "../assets/img/ddevilred.jpg";
@@ -47,7 +49,7 @@ const Home = () => {
       </section>
 
       {/* Scrollable Content */}
-      <section className="w-full pt-10 pb-10 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
+      <section className="w-full pt-10 pb-16 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
         <NewsCarousel
           items={[
             {
@@ -118,24 +120,21 @@ const Home = () => {
         />
       </section>
 
+      {/* Intro hero between news and categories */}
+      <HeroLead />
+
       {/* Categories section */}
-      <section className="w-full pt-8 pb-12 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
-        <div className="px-8 mb-6 flex flex-col items-center text-center">
-          <h2 className="text-4xl md:text-5xl font-geist font-bold tracking-tight">
-            KATEGORIER
+      <section className="w-full pt-10 pb-12 bg-faraos-bg">
+        <div className="mx-auto max-w-[1680px] px-8 mb-5">
+          <h2 className="text-2xl md:text-3xl font-geist font-bold tracking-wide text-white">
+            Kategorier
           </h2>
-          <NavLink
-            to="/kategorier"
-            className="mt-2 text-sm font-geist text-neutral-300 hover:text-white underline underline-offset-4"
-          >
-            Se alle kategorier
-          </NavLink>
         </div>
         <div className="px-8">
           <CategoryCarousel
             categories={[
               {
-                title: "Comics",
+                title: "Tegneserier",
                 image: womanWithoutFear,
               },
               {
@@ -166,6 +165,172 @@ const Home = () => {
             ]}
           />
         </div>
+      </section>
+
+      {/* Curated selections */}
+      <section className="w-full pt-6 pb-16 bg-faraos-bg ring-1 ring-neutral-900 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
+        <ProductRow
+          title="Faraos anbefaler"
+          cols={4}
+          items={[
+            {
+              image: womanWithoutFear,
+              title: "Daredevil: Woman Without Fear",
+              author: "Chip Zdarsky",
+              price: 159,
+              link: "/comics",
+            },
+            {
+              image: superman,
+              title: "Superman: Red Son",
+              author: "Mark Millar",
+              price: 199,
+              link: "/comics",
+            },
+            {
+              image: alva,
+              title: "ALVA",
+              author: "Tegner",
+              price: 149,
+              link: "/comics",
+            },
+            {
+              image: graensebyen,
+              title: "Grænsebyen",
+              author: "Jeff Lemire",
+              price: 168,
+              link: "/comics",
+            },
+            {
+              image: shadowCrane,
+              title: "Shadow of the Golden Crane",
+              author: "Mike Mignola",
+              price: 249,
+              link: "/comics",
+            },
+          ]}
+        />
+        <ProductRow
+          title="Eventyr & fantasy"
+          cols={5}
+          items={[
+            {
+              image: hildaTwig,
+              title: "Hilda And Twig",
+              author: "Luke Pearson",
+              price: 179,
+              link: "/comics",
+            },
+            {
+              image: starwars,
+              title: "Star Wars Legends",
+              author: "Carre & Sanchez",
+              price: 349,
+              link: "/comics",
+            },
+            {
+              image: minorArcana,
+              title: "Minor Arcana",
+              author: "Various",
+              price: 139,
+              link: "/comics",
+            },
+            {
+              image: alva,
+              title: "Alva",
+              author: "Fantasy",
+              price: 149,
+              link: "/comics",
+            },
+          ]}
+        />
+        <ProductRow
+          title="Manga essentials"
+          cols={5}
+          items={[
+            {
+              image: hildaTwig,
+              title: "Manga Starter Vol. 1",
+              author: "Various",
+              price: 99,
+              link: "/comics",
+            },
+            {
+              image: milesMorales,
+              title: "Shonen Picks",
+              author: "Various",
+              price: 129,
+              link: "/comics",
+            },
+            {
+              image: alva,
+              title: "Classic Manga",
+              author: "Various",
+              price: 149,
+              link: "/comics",
+            },
+          ]}
+        />
+        <ProductRow
+          title="Danske klassikere"
+          cols={5}
+          items={[
+            {
+              image: graensebyen,
+              title: "Old Man Logan: Grænsebyen",
+              author: "Jeff Lemire",
+              price: 168,
+              link: "/comics",
+            },
+            {
+              image: alva,
+              title: "Dansk Klassiker",
+              author: "Forfatter",
+              price: 149,
+              link: "/comics",
+            },
+          ]}
+        />
+        <ProductRow
+          title="Award winners"
+          cols={5}
+          items={[
+            {
+              image: superman,
+              title: "Watchmen Deluxe",
+              author: "Alan Moore",
+              price: 299,
+              link: "/comics",
+            },
+            {
+              image: minorArcana,
+              title: "Eisner Picks",
+              author: "Various",
+              price: 179,
+              link: "/comics",
+            },
+          ]}
+        />
+        <ProductRow
+          title="Dark and gritty"
+          cols={5}
+          items={[
+            {
+              image: womanWithoutFear,
+              title: "Daredevil Collection",
+              author: "Frank Miller",
+              price: 199,
+              link: "/comics",
+            },
+            {
+              image: shadowCrane,
+              title: "Shadow Tales",
+              author: "Mike Mignola",
+              price: 249,
+              link: "/comics",
+            },
+          ]}
+        />
       </section>
     </div>
   );

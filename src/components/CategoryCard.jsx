@@ -3,7 +3,7 @@ import React from "react";
 const CategoryCard = ({ image, title }) => {
   return (
     <div className="group group/title relative overflow-hidden rounded-xl bg-neutral-900 ring-1 ring-neutral-800 shadow-[0_6px_24px_-8px_rgba(0,0,0,0.6)] transition-colors">
-      <div className="relative aspect-[21/9] md:aspect-[21/9]">
+      <div className="relative aspect-[21/10] md:aspect-[21/10]">
         <img
           src={image}
           alt={title}
@@ -16,7 +16,7 @@ const CategoryCard = ({ image, title }) => {
           <div className="absolute -left-1/2 top-0 h-full w-[120%] bg-[linear-gradient(100deg,transparent,rgba(255,255,255,0.06),transparent)] opacity-0 group-hover:opacity-100 animate-[sheen_1.2s_ease-in-out]" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between">
-          <h3 className="font-geist font-bold text-xl md:text-2xl text-white drop-shadow-lg">
+          <h3 className="font-geist font-bold text-lg md:text-xl text-white drop-shadow-lg">
             <span className="px-2 py-1 rounded-md bg-black/30 backdrop-blur-[1px] ring-1 ring-white/10 hover-underline">
               {title}
             </span>

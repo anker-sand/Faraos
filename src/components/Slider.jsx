@@ -58,7 +58,7 @@ const Slider = ({
   });
 
   return (
-    <div className="w-full h-[70vh] overflow-hidden">
+    <div className="w-full h-[70vh] overflow-hidden rounded-b-[36px] md:rounded-b-[44px]">
       {/* Slides */}
       <div
         className="flex transition-transform duration-600 ease-out h-full"
@@ -77,17 +77,20 @@ const Slider = ({
             <img
               src={slide.image}
               alt={slide.title}
-              className="absolute inset-0 w-full h-full object-cover object-[50%_0%] transition-transform duration-700 ease-[cubic-bezier(.25,.6,.3,1)] group-hover:scale-[1.05]"
+              className="absolute inset-0 w-full h-full object-cover object-[50%_0%] transition-transform duration-700 ease-[cubic-bezier(.25,.6,.3,1)] group-hover:scale-[1.025]"
               draggable="false"
             />
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/55 to-transparent" />
+              {/* Tiny bottom shadow to gently smooth the transition */}
+              <div className="absolute inset-x-0 bottom-0 h-3 bg-gradient-to-t from-black/20 to-transparent" />
+              {/* Softer main bottom fade for a more natural look */}
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/35 to-transparent" />
             </div>
             {/* Content (overlay) */}
-            <div className="relative z-10 px-12 pb-20 pt-12 max-w-3xl">
+            <div className="relative z-10 px-12 pb-12 pt-12 max-w-3xl">
               <h2 className="text-6xl font-geist font-bold mb-4 tracking-tight text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]">
-                {slide.title}
+                <span className="whitespace-nowrap">{slide.title}</span>
               </h2>
               {slide.description && (
                 <p className="text-2xl text-neutral-100 mb-8 max-w-2xl leading-snug drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">

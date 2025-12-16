@@ -1,0 +1,362 @@
+/* ComicsStore page CSS Module - plain CSS (no @apply) */
+
+.page {
+  min-height: 100vh;
+  background-color: #0a0a0a; /* neutral-950 */
+  color: #f5f5f5; /* neutral-100 */
+  padding-top: 12rem; /* reduce top padding so cards start higher */
+}
+.container {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 1rem; /* px-4 */
+  padding-bottom: 6rem; /* pb-24 */
+}
+@media (min-width: 768px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+.header {
+  margin-bottom: 1rem; /* tighten header spacing */
+}
+@media (min-width: 768px) {
+  .header {
+    margin-bottom: 2.5rem;
+  }
+}
+.title {
+  text-align: center;
+  font-family: Geist, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+  font-weight: 700;
+  font-size: 1.875rem; /* text-3xl */
+  margin-bottom: 2rem;
+}
+@media (min-width: 768px) {
+  .title {
+    font-size: 3rem; /* text-5xl */
+  }
+}
+.searchWrap {
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.tagsWrap {
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative; /* allow arrows to be positioned outside rail */
+}
+@media (min-width: 768px) {
+  .tagsWrap {
+    gap: 0.5rem;
+    margin-bottom: 1rem; /* reduce space below tags */
+  }
+}
+.tagsLabel {
+  font-size: 0.875rem;
+  color: #a3a3a3;
+}
+@media (min-width: 768px) {
+  .tagsLabel {
+    font-size: 1rem;
+  }
+}
+.tagsRelative {
+  position: relative;
+  width: 100%;
+  overflow: visible; /* no clipping; allow arrows to sit naturally */
+  display: flex;
+  align-items: center;
+  margin-bottom: 6rem;
+}
+
+.tagBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 5px;
+  background-color: #171717; /* neutral-900 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  border: 1px solid #262626;
+}
+@media (min-width: 768px) {
+  .tagBtn {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+.tagBtn:hover {
+  background-color: #262626;
+}
+.tagBtnLeft {
+  left: 0;
+}
+.tagBtnRight {
+  right: 0;
+}
+.tagIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d4d4d4;
+}
+
+.tagsRailPad {
+  padding: 0 3rem; /* leave horizontal room for arrows */
+  width: 100%;
+}
+.tagsRail {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0; /* no vertical padding to keep true center */
+  /* hide scrollbar cross-browser while preserving scroll */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+@media (min-width: 768px) {
+  .tagsRail {
+    gap: 0.75rem;
+  }
+}
+.tagsRail::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.tagsRail::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tagsRail::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.tagPill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem; /* Fix pill height to align with rail height */
+  padding: 0 0.75rem; /* 12px horizontal */
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  border: 1px solid #262626;
+  background-color: rgba(23, 23, 23, 0.9);
+  transition: background-color 0.2s ease;
+}
+@media (min-width: 768px) {
+  .tagPill {
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+.tagPill:hover {
+  background-color: #262626;
+}
+.tagPill[data-active="true"] {
+  background-color: #ef4444; /* red-500 */
+  border-color: #b91c1c; /* red-700 */
+  color: #ffffff;
+}
+.tagPill[data-active="true"]:hover {
+  background-color: #dc2626; /* red-600 */
+}
+.tagMoreBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  border: 1px solid #262626;
+  background-color: rgba(23, 23, 23, 0.9);
+  transition: background-color 0.2s ease;
+}
+@media (min-width: 768px) {
+  .tagMoreBtn {
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+.tagMoreBtn:hover {
+  background-color: #262626;
+}
+
+.resultsGridRow {
+  position: relative;
+  max-width: 80rem; /* match products area */
+  margin: 0 auto; /* center under titles */
+
+  margin-bottom: 2rem; /* smaller gap before products grid */
+}
+.resultsSpacer {
+  display: none !important; /* no reserved left space; row is centered */
+}
+.resultsInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.selectedFilters {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center; /* center between count and sort */
+}
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  background-color: rgba(23, 23, 23, 0.7);
+  border: 1px solid #262626;
+  color: #e5e5e5;
+}
+.chipRemoveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: #171717;
+  border: 1px solid #262626;
+  color: #d4d4d4;
+}
+.chipRemoveBtn:hover {
+  background-color: #262626;
+}
+.resultsCountLabel {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #a3a3a3;
+}
+.resultsCountValue {
+  font-family: Geist, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+  font-weight: 700;
+  color: #e5e5e5;
+}
+.sortBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(23, 23, 23, 0.7);
+  border: 1px solid #262626;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.5rem;
+}
+.sortLabel {
+  font-size: 0.875rem;
+  color: #d4d4d4;
+}
+.sortSelect {
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #171717;
+  border: 1px solid #262626;
+  font-size: 0.875rem;
+  color: #e5e5e5;
+}
+.sortSelect:focus {
+  outline: 2px solid #16a34a;
+}
+
+/* Center the products grid under titles; place sidebar to the left */
+.mainGridRow {
+  position: relative;
+
+  margin: 0 auto; /* center products section */
+  padding-left: 0; /* no extra left padding */
+}
+@media (min-width: 1280px) {
+  .mainGridRow {
+    max-width: 80rem;
+  }
+}
+.sidebarCol {
+  position: absolute;
+  top: 0;
+  width: 250px;
+  /* anchor next to the centered products area (80rem wide) */
+  left: calc(50% - 43rem - 1.5rem - 250px); /* 80rem/2 = 40rem; 1.5rem gap */
+}
+
+.productsSection {
+  flex: 1 1 auto;
+  margin-top: 0;
+}
+.emptyBox {
+  text-align: center;
+  padding: 4rem 0;
+  border-radius: 0.5rem;
+  background-color: rgba(23, 23, 23, 0.6);
+  border: 1px solid #262626;
+}
+.emptyTitle {
+  font-size: 1.5rem;
+  font-family: Geist, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.emptyText {
+  font-size: 0.875rem;
+  color: #a3a3a3;
+}
+.emptyBtn {
+  font-size: 0.875rem;
+  background-color: #262626;
+  color: #e5e5e5;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(115, 115, 115, 0.7);
+}
+.emptyBtn:hover {
+  background-color: #3f3f3f;
+}
+
+.gridProducts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .gridProducts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .gridProducts {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 1536px) {
+  .gridProducts {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

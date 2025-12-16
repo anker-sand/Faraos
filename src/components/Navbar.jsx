@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import logoSrc from "../assets/img/Faraoswhitelogo.png";
 import comicsImg from "../assets/img/nav/comicsimg.jpg";
 import rollespilImg from "../assets/img/nav/rollespil.jpg";
@@ -10,6 +10,8 @@ const Navbar = () => {
   const [dropdownLeft, setDropdownLeft] = useState(0);
   const [dropdownWidth, setDropdownWidth] = useState(undefined);
   const navRef = useRef(null);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const categories = [
     {
@@ -66,6 +68,7 @@ const Navbar = () => {
 
   return (
     <nav
+      id="global-navbar"
       ref={navRef}
       className={styles.nav}
       onMouseLeave={() => setOpenCategory(null)}
@@ -82,35 +85,35 @@ const Navbar = () => {
               className={styles.group}
               onMouseEnter={(e) => {
                 setOpenCategory(category.name);
-                const buttonEl = e.currentTarget.querySelector("button");
+                const linkEl = e.currentTarget.querySelector("a");
                 const navEl = navRef.current;
-                if (buttonEl && navEl) {
-                  const buttonRect = buttonEl.getBoundingClientRect();
+                if (linkEl && navEl) {
+                  const linkRect = linkEl.getBoundingClientRect();
                   const navRect = navEl.getBoundingClientRect();
-                  const MIN_PANEL_WIDTH = 280; // slightly narrower panel
-                  const panelWidth = Math.max(
-                    buttonRect.width,
-                    MIN_PANEL_WIDTH
-                  );
+                  const MIN_PANEL_WIDTH = 280;
+                  const panelWidth = Math.max(linkRect.width, MIN_PANEL_WIDTH);
                   setDropdownWidth(panelWidth);
-                  const buttonCenter = buttonRect.left + buttonRect.width / 2;
+                  const linkCenter = linkRect.left + linkRect.width / 2;
                   const centeredLeft =
-                    buttonCenter - panelWidth / 2 - navRect.left;
+                    linkCenter - panelWidth / 2 - navRect.left;
                   setDropdownLeft(centeredLeft);
                 }
               }}
             >
-              <button
-                className={`${styles.buttonCategory} ${styles.hoverUnderline}`}
+              <NavLink
+                to={category.name === "COMICS" ? "/" : category.path}
+                className={`${styles.buttonCategory} ${styles.cubeLink} ${
+                  isHome && category.name === "COMICS" ? styles.cubeActive : ""
+                }`}
               >
                 {category.name}
-              </button>
+              </NavLink>
             </div>
           ))}
 
           <NavLink
             to="/klub-faraos"
-            className={`${styles.linkPrimary} ${styles.hoverUnderline}`}
+            className={`${styles.linkPrimary} ${styles.cubeLink}`}
           >
             KLUB FARAOS
           </NavLink>

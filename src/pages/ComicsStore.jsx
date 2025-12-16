@@ -1,5 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import styles from "./ComicsStore.module.css";
 import ProductCard from "../components/ProductCard.jsx";
+import SearchBar from "../components/SearchBar.jsx";
+import FiltersPanel from "../components/FiltersPanel.jsx";
+import { db } from "../lib/firebase.js";
+import { collection, onSnapshot } from "firebase/firestore";
 // Image module imports ensure Vite handles optimization & hashing
 import imgWomanWithoutFear from "../assets/img/comics/womanwithoutfear.jpg";
 import imgMilesMorales from "../assets/img/comics/milesmorales.jpg";
@@ -17,6 +22,7 @@ const allProducts = [
     title: "Daredevil by Chip Zdarsky vol. 6",
     price: 159,
     author: "Chip Zdarsky",
+    publisher: "Marvel",
     category: "US comics",
     subcategory: "Daredevil",
     date: 2022,
@@ -27,6 +33,7 @@ const allProducts = [
     title: "Miles Morales: Spider-Man",
     price: 179,
     author: "Cody Ziglar",
+    publisher: "Marvel",
     category: "US comics",
     subcategory: "Spider-Man",
     date: 2023,
@@ -37,6 +44,7 @@ const allProducts = [
     title: "Hilda And Twig Wake the Ice Man",
     price: 129,
     author: "Luke Pearson",
+    publisher: "Flying Eye Books",
     category: "DK comics",
     subcategory: "Hilda",
     date: 2020,
@@ -47,6 +55,7 @@ const allProducts = [
     title: "Star Wars Legends Old Republic Omnibus vol. 2",
     price: 349,
     author: "Various",
+    publisher: "Dark Horse",
     category: "US comics",
     subcategory: "Star Wars",
     date: 2024,
@@ -57,6 +66,7 @@ const allProducts = [
     title: "Shadow of the Golden Crane",
     price: 189,
     author: "Ken Liu",
+    publisher: "Saga Press",
     category: "Graphic Novels",
     subcategory: "Fantasy",
     date: 2019,
@@ -67,6 +77,7 @@ const allProducts = [
     title: "Superman Action Comics",
     price: 159,
     author: "Philip Kennedy Johnson",
+    publisher: "DC",
     category: "US comics",
     subcategory: "Superman",
     date: 2023,
@@ -77,6 +88,7 @@ const allProducts = [
     title: "Alva",
     price: 99,
     author: "Josefine Ottesen",
+    publisher: "Gyldendal",
     category: "Bøger",
     subcategory: "DK",
     date: 2018,
@@ -85,421 +97,668 @@ const allProducts = [
     id: 8,
     image: imgGraensebyen,
     title: "Grænsebyen",
-    price: 149,
-    author: "Rune Ryberg",
+    price: 249,
+    author: "Carsten Søndergaard",
+    publisher: "Cobolt",
     category: "DK comics",
-    subcategory: "Indie",
+    subcategory: "Tintin",
     date: 2021,
   },
 ];
 
-const categories = {
-  "DK comics": ["Tintin", "Asterix", "Disney", "Indie", "Hilda"],
-  "US comics": ["Spider-Man", "Batman", "Superman", "Daredevil", "Star Wars"],
-  Manga: ["Shonen", "Shojo", "Seinen"],
-  "Graphic Novels": ["Fantasy", "Sci-Fi", "Drama"],
-  Bøger: ["DK", "Fantasy", "Non-fiction"],
-};
-
-const priceRanges = [
-  { label: "Under 100", value: "under100", test: (p) => p < 100 },
-  { label: "100–199", value: "100_199", test: (p) => p >= 100 && p <= 199 },
-  { label: "200–299", value: "200_299", test: (p) => p >= 200 && p <= 299 },
-  { label: "300+", value: "300_plus", test: (p) => p >= 300 },
+const sortOptions = [
+  { value: "dateDesc", label: "Nyeste" },
+  { value: "dateAsc", label: "Ældste" },
+  { value: "az", label: "A → Z" },
+  { value: "za", label: "Z → A" },
+  { value: "priceAsc", label: "Pris: Lav til høj" },
+  { value: "priceDesc", label: "Pris: Høj til lav" },
 ];
 
-const sortOptions = [
-  { label: "A → Z", value: "az" },
-  { label: "Z → A", value: "za" },
-  { label: "Price: Low → High", value: "priceAsc" },
-  { label: "Price: High → Low", value: "priceDesc" },
-  { label: "Newest", value: "dateDesc" },
-  { label: "Oldest", value: "dateAsc" },
+const priceRanges = [
+  { value: "under100", label: "Under 100 kr" },
+  { value: "100to199", label: "100–199 kr" },
+  { value: "200to299", label: "200–299 kr" },
+  { value: "300plus", label: "300+ kr" },
 ];
 
 const ComicsStore = () => {
   const [query, setQuery] = useState("");
-  // Single active category for clearer UX (accordion acts as selector)
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [activeSubs, setActiveSubs] = useState(new Set());
-  const [activePrices, setActivePrices] = useState(new Set());
-  const [sort, setSort] = useState("az");
+  const [sort, setSort] = useState("dateDesc");
+  // Start empty so hardcoded items are hidden; Firestore fills in.
+  const [products, setProducts] = useState([]);
 
-  const toggleSet = (setFn, current, key) => {
-    const next = new Set(current);
-    if (next.has(key)) next.delete(key);
-    else next.add(key);
-    setFn(next);
+  // Filter states
+  const [formats, setFormats] = useState(new Set());
+  const [genres, setGenres] = useState(new Set());
+  const [languages, setLanguages] = useState(new Set());
+  const [activePrices, setActivePrices] = useState(new Set());
+  const [authors, setAuthors] = useState(new Set());
+  const [publishers, setPublishers] = useState(new Set());
+  const [series, setSeries] = useState(new Set());
+
+  // Category helpers used by tags
+  const [activeCategory, setActiveCategory] = useState("");
+  // Deprecated: use `series` instead of `activeSubs`
+  const [activeSubs, setActiveSubs] = useState(new Set());
+
+  // Sidebar open states: Sprog open by default
+  const [open, setOpen] = useState({
+    language: true,
+    format: false,
+    genre: false,
+    price: false,
+    author: false,
+    publisher: false,
+    series: false,
+  });
+  const [showAllGenres, setShowAllGenres] = useState(false);
+
+  // Tag row toggle under search
+  // Tag row no longer toggles; always show full set
+  const tagsScrollRef = useRef(null);
+
+  const scrollTags = (dir) => {
+    const el = tagsScrollRef.current;
+    if (!el) return;
+    const delta = 480; // scroll amount per click
+    el.scrollBy({ left: dir === "left" ? -delta : delta, behavior: "smooth" });
+  };
+
+  const toggleSet = (setter, set, val) => {
+    const next = new Set(set);
+    if (next.has(val)) next.delete(val);
+    else next.add(val);
+    setter(next);
   };
 
   const resetAll = () => {
     setQuery("");
-    setActiveCategory(null);
-    setActiveSubs(new Set());
+    setSort("dateDesc");
+    setFormats(new Set());
+    setGenres(new Set());
+    setLanguages(new Set());
     setActivePrices(new Set());
-    setSort("az");
-    setExpandedCats(new Set());
+    setActiveCategory("");
+    setActiveSubs(new Set());
+    setAuthors(new Set());
+    setPublishers(new Set());
+    setSeries(new Set());
   };
 
-  const collator = useMemo(
-    () => new Intl.Collator(undefined, { sensitivity: "base" }),
-    []
+  const collator = useMemo(() => new Intl.Collator("da"), []);
+
+  // Load products from Firestore (fallback to local seed if collection empty)
+  useEffect(() => {
+    const colRef = collection(db, "Comics");
+    const unsub = onSnapshot(
+      colRef,
+      (snap) => {
+        const docs = snap.docs.map((d) => {
+          const data = d.data() || {};
+          const title = (data["Titel"] ?? data.titel ?? data.title) || "";
+          const author =
+            (data["Forfatter"] ?? data.forfatter ?? data.author) || "";
+          const publisher = data["Publisher"] ?? data.publisher ?? "";
+          const format = data["Format"] ?? data.format ?? "";
+          const language = data["Sprog"] ?? data.sprog ?? "";
+          const priceRaw = data["Pris"] ?? data.pris ?? data.price;
+          const yearRaw =
+            data["Udgivelsesår"] ??
+            data.udgivelsesår ??
+            data.date ??
+            data.releaseYear;
+          const volume = data["Volume"] ?? data.volume;
+          const series = (data["series"] ?? data.Series ?? "")
+            .toString()
+            .trim();
+          const image = (
+            data["Billede"] ??
+            data.billede ??
+            data.image ??
+            ""
+          ).toString();
+
+          // Derive category using language and format to fit existing UI filters
+          let category = undefined;
+          if (format === "Graphic Novel") category = "Graphic Novels";
+          else if (language === "Dansk") category = "DK comics";
+          else if (language) category = "US comics";
+
+          return {
+            id: d.id,
+            image,
+            title: title.toString().trim(),
+            price:
+              typeof priceRaw === "number" ? priceRaw : Number(priceRaw) || 0,
+            author: author.toString().trim(),
+            publisher: publisher.toString().trim(),
+            category,
+            subcategory: series || undefined,
+            date:
+              typeof yearRaw === "number"
+                ? yearRaw
+                : parseInt((yearRaw || "").toString().trim(), 10) || 0,
+            volume:
+              typeof volume === "number" ? volume : Number(volume) || undefined,
+            format,
+            language,
+            isActive: data.isActive ?? true,
+            stockCount: data.stockCount ?? 0,
+          };
+        });
+        setProducts(docs);
+        console.debug("Comics snapshot:", docs.length);
+      },
+      (e) => {
+        console.error("Firestore listener failed:", e);
+      }
+    );
+    return () => unsub();
+  }, []);
+
+  // Build option lists for new filters
+  const authorOptions = useMemo(
+    () => Array.from(new Set(products.map((p) => p.author).filter(Boolean))),
+    [products]
+  );
+  const publisherOptions = useMemo(
+    () => Array.from(new Set(products.map((p) => p.publisher).filter(Boolean))),
+    [products]
+  );
+  const seriesOptions = useMemo(
+    () =>
+      Array.from(new Set(products.map((p) => p.subcategory).filter(Boolean))),
+    [products]
   );
 
   const filtered = useMemo(() => {
-    let list = [...allProducts];
+    let list = products.slice();
+    const q = query.trim().toLowerCase();
 
-    // text search across title/author/subcategory
-    if (query.trim()) {
-      const q = query.toLowerCase();
+    if (q) {
       list = list.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
           (p.author || "").toLowerCase().includes(q) ||
+          (p.category || "").toLowerCase().includes(q) ||
           (p.subcategory || "").toLowerCase().includes(q)
       );
     }
 
-    // category filter (single)
     if (activeCategory) {
-      list = list.filter((p) => p.category === activeCategory);
+      list = list.filter((p) => (p.category || "") === activeCategory);
     }
 
-    // subcategory filter
-    if (activeSubs.size) {
-      list = list.filter((p) => activeSubs.has(p.subcategory));
+    // Format filter
+    if (formats.size) {
+      list = list.filter((p) => formats.has(p.format));
     }
 
-    // price filter
+    // Series filter (by subcategory)
+    if (series.size) {
+      list = list.filter((p) => series.has(p.subcategory));
+    }
+
+    if (genres.size) {
+      const gset = new Set(Array.from(genres).map((g) => g.toLowerCase()));
+      list = list.filter((p) => {
+        const sub = (p.subcategory || "").toLowerCase();
+        return (
+          gset.has(sub) ||
+          (gset.has("superhero") &&
+            ["daredevil", "batman", "spider-man", "superman"].some((s) =>
+              sub.includes(s)
+            ))
+        );
+      });
+    }
+
+    // Author filter
+    if (authors.size) {
+      list = list.filter((p) => authors.has(p.author));
+    }
+
+    // Publisher filter
+    if (publishers.size) {
+      list = list.filter((p) => publishers.has(p.publisher));
+    }
+
+    // Price filter
     if (activePrices.size) {
       list = list.filter((p) => {
-        for (const r of priceRanges) {
-          if (activePrices.has(r.value) && r.test(p.price)) return true;
-        }
+        const price = p.price || 0;
+        if (activePrices.has("under100") && price < 100) return true;
+        if (activePrices.has("100to199") && price >= 100 && price <= 199)
+          return true;
+        if (activePrices.has("200to299") && price >= 200 && price <= 299)
+          return true;
+        if (activePrices.has("300plus") && price >= 300) return true;
         return false;
       });
     }
 
-    // sort
-    switch (sort) {
-      case "az":
-        list.sort((a, b) => collator.compare(a.title, b.title));
-        break;
-      case "za":
-        list.sort((a, b) => collator.compare(b.title, a.title));
-        break;
-      case "priceAsc":
-        list.sort((a, b) => a.price - b.price);
-        break;
-      case "priceDesc":
-        list.sort((a, b) => b.price - a.price);
-        break;
-      case "dateDesc":
-        list.sort((a, b) => (b.date || 0) - (a.date || 0));
-        break;
-      case "dateAsc":
-        list.sort((a, b) => (a.date || 0) - (b.date || 0));
-        break;
-      default:
-        break;
-    }
-
     return list;
-  }, [query, activeCategory, activeSubs, activePrices, sort, collator]);
+  }, [
+    products,
+    query,
+    activeCategory,
+    activePrices,
+    formats,
+    genres,
+    authors,
+    publishers,
+    series,
+    sort,
+    collator,
+  ]);
 
-  // Category groups collapsed by default; price section collapsed
-  const [expandedCats, setExpandedCats] = useState(new Set());
-  const [expandPrice, setExpandPrice] = useState(false);
+  const selectedFilters = useMemo(() => {
+    const chips = [];
+    if (activeCategory)
+      chips.push({
+        type: "Kategori",
+        typeKey: "category",
+        value: activeCategory,
+        label: `Kategori: ${activeCategory}`,
+      });
+    formats.forEach((v) =>
+      chips.push({
+        type: "Format",
+        typeKey: "formats",
+        value: v,
+        label: `Format: ${v}`,
+      })
+    );
+    genres.forEach((v) =>
+      chips.push({
+        type: "Genre",
+        typeKey: "genres",
+        value: v,
+        label: `Genre: ${v}`,
+      })
+    );
+    languages.forEach((v) =>
+      chips.push({
+        type: "Sprog",
+        typeKey: "languages",
+        value: v,
+        label: `Sprog: ${v}`,
+      })
+    );
+    authors.forEach((v) =>
+      chips.push({
+        type: "Forfatter",
+        typeKey: "authors",
+        value: v,
+        label: `Forfatter: ${v}`,
+      })
+    );
+    publishers.forEach((v) =>
+      chips.push({
+        type: "Forlag",
+        typeKey: "publishers",
+        value: v,
+        label: `Forlag: ${v}`,
+      })
+    );
+    series.forEach((v) =>
+      chips.push({
+        type: "Serier",
+        typeKey: "series",
+        value: v,
+        label: `Serier: ${v}`,
+      })
+    );
+    const priceLabel = (val) =>
+      priceRanges.find((r) => r.value === val)?.label || val;
+    activePrices.forEach((v) =>
+      chips.push({
+        type: "Pris",
+        typeKey: "price",
+        value: v,
+        label: `Pris: ${priceLabel(v)}`,
+      })
+    );
+    return chips;
+  }, [
+    activeCategory,
+    formats,
+    genres,
+    languages,
+    authors,
+    publishers,
+    series,
+    activePrices,
+  ]);
 
-  const toggleCatExpand = (cat) => {
-    setExpandedCats((prev) => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return next;
-    });
+  const removeFilter = (typeKey, value) => {
+    if (typeKey === "category") {
+      setActiveCategory("");
+      return;
+    }
+    if (typeKey === "price") {
+      const next = new Set(activePrices);
+      next.delete(value);
+      setActivePrices(next);
+      return;
+    }
+    const map = {
+      formats: [formats, setFormats],
+      genres: [genres, setGenres],
+      languages: [languages, setLanguages],
+      authors: [authors, setAuthors],
+      publishers: [publishers, setPublishers],
+      series: [series, setSeries],
+    };
+    const pair = map[typeKey];
+    if (!pair) return;
+    const [set, setter] = pair;
+    const next = new Set(set);
+    next.delete(value);
+    setter(next);
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      {/* Extra top padding to clear the navbar */}
-      <div className="mx-auto max-w-[1680px] px-4 md:px-6 pt-49 pb-24">
-        {/* Page Title placed above the grid so sidebar aligns below */}
-        <div className="mb-4 md:mb-6">
-          <h1 className="text-3xl md:text-6xl font-geist font-bold">COMICS</h1>
-          <h2 className="text-2xl py-6 text-neutral-400 max-w-4xl">
-            Filtrer eller søg i vores store udvalg af tegneserier, graphic
-            novels og manga bøger. <br />
-            Læser du på engelsk eller dansk? Faraos har noget for enhver smag!
-          </h2>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Comics</h1>
+          <div className={styles.searchWrap}>
+            <SearchBar
+              products={products}
+              filtersIndex={{
+                Format: [
+                  "Tegneserie (hæfte)",
+                  "Graphic Novel",
+                  "Manga",
+                  "Omnibus / Samlebind",
+                  "Hardcover",
+                  "Paperback",
+                ],
+                Genre: [
+                  "Superhero",
+                  "Sci-Fi",
+                  "Horror",
+                  "Fantasy",
+                  "Dark and gritty",
+                ],
+                Sprog: ["Dansk", "Engelsk", "Japansk"],
+              }}
+              onApplyFilter={({ type, value }) => {
+                const map = {
+                  Format: [formats, setFormats],
+                  Genre: [genres, setGenres],
+                  Sprog: [languages, setLanguages],
+                };
+                const pair = map[type];
+                if (pair) {
+                  const [set, setter] = pair;
+                  const next = new Set(set);
+                  next.add(value);
+                  setter(next);
+                }
+              }}
+              onSearch={setQuery}
+            />
+          </div>
         </div>
 
-        {/* Controls bar: results on left, sorting on right */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 md:mb-6">
-          <div className="flex items-center gap-2 text-sm text-neutral-400">
-            <span>Resultater:</span>
-            <span className="font-geist font-bold text-neutral-200">
-              {filtered.length}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 bg-neutral-900/70 ring-1 ring-neutral-800 rounded-md px-2 py-1.5">
-            <label className="text-sm text-neutral-300">Sortér</label>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="h-9 px-3 rounded bg-neutral-900 ring-1 ring-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
-            >
-              {sortOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Active filter chips under controls (hidden if none) */}
-        {query || activeCategory || activeSubs.size || activePrices.size ? (
-          <div className="mb-8 flex flex-wrap gap-2">
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="text-xs bg-neutral-800 hover:bg-neutral-700 rounded-full px-3 py-1 flex items-center gap-1 ring-1 ring-neutral-700/70"
-              >
-                <span>Søg: {query}</span>{" "}
-                <span className="text-neutral-400">✕</span>
-              </button>
-            )}
-            {activeCategory && (
-              <button
-                type="button"
-                onClick={() => setActiveCategory(null)}
-                className="text-xs bg-neutral-800 hover:bg-neutral-700 rounded-full px-3 py-1 flex items-center gap-1 ring-1 ring-neutral-700/70"
-              >
-                <span>{activeCategory}</span>{" "}
-                <span className="text-neutral-400">✕</span>
-              </button>
-            )}
-            {[...activeSubs].map((s) => (
-              <button
-                type="button"
-                key={s}
-                onClick={() => toggleSet(setActiveSubs, activeSubs, s)}
-                className="text-xs bg-neutral-800 hover:bg-neutral-700 rounded-full px-3 py-1 flex items-center gap-1 ring-1 ring-neutral-700/70"
-              >
-                <span>{s}</span> <span className="text-neutral-400">✕</span>
-              </button>
-            ))}
-            {[...activePrices].map((p) => {
-              const label = priceRanges.find((r) => r.value === p)?.label || p;
-              return (
-                <button
-                  type="button"
-                  key={p}
-                  onClick={() => toggleSet(setActivePrices, activePrices, p)}
-                  className="text-xs bg-neutral-800 hover:bg-neutral-700 rounded-full px-3 py-1 flex items-center gap-1 ring-1 ring-neutral-700/70"
-                >
-                  <span>{label}</span>{" "}
-                  <span className="text-neutral-400">✕</span>
-                </button>
-              );
-            })}
+        {/* Tags under search, centered and width-matched to search */}
+        <div className={styles.tagsWrap}>
+          <span className={styles.tagsLabel}></span>
+          {/* Scrollable tag rail with arrows positioned within the rail container */}
+          <div className={styles.tagsRelative}>
             <button
               type="button"
-              onClick={resetAll}
-              className="text-xs bg-red-600 hover:bg-red-500 rounded-full px-3 py-1 font-geist font-bold shadow-[0_0_0_1px_rgba(0,0,0,0.2)]"
+              aria-label="Scroll tags left"
+              onClick={() => scrollTags("left")}
+              className={`${styles.tagBtn} ${styles.tagBtnLeft}`}
             >
-              Ryd alle
-            </button>
-          </div>
-        ) : null}
-
-        {/* Main grid with sidebar and products starts below header/controls */}
-        <div className="grid lg:grid-cols-[320px_1fr] gap-8 xl:gap-10 items-start">
-          {/* Sidebar */}
-          <aside className="rounded-xl bg-neutral-900/95 backdrop-blur-sm ring-1 ring-neutral-800 p-6 sticky top-28 space-y-6">
-            <div className="flex items-center gap-2 mb-5">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Søg i filtre..."
-                className="font-geist w-full h-11 px-4 rounded-lg bg-neutral-800/80 text-sm placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-green-600 transition"
-              />
-              <button
-                onClick={resetAll}
-                className="h-11 px-4 rounded-lg bg-neutral-800/80 text-xs font-geist font-bold ring-1 ring-neutral-700 hover:bg-neutral-750 tracking-wide"
+              <svg
+                className={styles.tagIcon}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                Reset
-              </button>
-            </div>
-
-            {/* Category groups (accordion + selection) */}
-            <div className="mt-1">
-              <h2 className="font-geist font-bold text-sm uppercase tracking-wide text-neutral-300 px-2 mb-2">
-                Kategorier
-              </h2>
-              <div className="space-y-3">
-                {Object.entries(categories).map(([cat, subs]) => {
-                  const isExpanded = expandedCats.has(cat);
-                  const isActive = activeCategory === cat;
-                  return (
-                    <div
-                      key={cat}
-                      className="border border-neutral-800 rounded-lg overflow-hidden"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveCategory((prev) => {
-                            if (prev === cat) {
-                              setActiveSubs(new Set());
-                              return null;
-                            }
-                            return cat;
-                          });
-                          setExpandedCats((prev) => {
-                            const next = new Set(prev);
-                            next.add(cat);
-                            return next;
-                          });
-                          setActiveSubs((prev) => {
-                            const allowed = new Set(subs);
-                            return new Set(
-                              [...prev].filter((s) => allowed.has(s))
-                            );
-                          });
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 font-geist text-[15px] transition-colors ${
-                          isActive
-                            ? "bg-neutral-850 text-neutral-100"
-                            : "text-neutral-300 hover:bg-neutral-850"
-                        }`}
-                        aria-expanded={isExpanded}
-                        aria-controls={`subs-${cat.replace(/\s+/g, "-")}`}
-                      >
-                        <span className="flex items-center gap-2 tracking-wide">
-                          {cat}
-                          <span
-                            className={`w-2.5 h-2.5 rounded-full ml-1 ${
-                              isActive ? "bg-green-500" : "bg-neutral-600"
-                            }`}
-                          ></span>
-                        </span>
-                        <span className="text-xs text-neutral-500">
-                          {isExpanded ? "▾" : "▸"}
-                        </span>
-                      </button>
-                      {isExpanded && (
-                        <div
-                          id={`subs-${cat.replace(/\s+/g, "-")}`}
-                          className="bg-neutral-900/70 px-4 pt-3 pb-4 space-y-1"
-                          role="group"
-                          aria-label={`Underkategorier for ${cat}`}
-                        >
-                          {subs.map((s) => (
-                            <label
-                              key={s}
-                              className="flex items-center gap-2 text-xs font-geist text-neutral-300"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={activeSubs.has(s)}
-                                onChange={() =>
-                                  toggleSet(setActiveSubs, activeSubs, s)
-                                }
-                                disabled={
-                                  activeCategory && activeCategory !== cat
-                                }
-                                className="f-checkbox"
-                              />
-                              <span>{s}</span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Scroll tags right"
+              onClick={() => scrollTags("right")}
+              className={`${styles.tagBtn} ${styles.tagBtnRight}`}
+            >
+              <svg
+                className={styles.tagIcon}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+            <div className={styles.tagsRailPad}>
+              <div ref={tagsScrollRef} className={styles.tagsRail}>
+                {[
+                  "Tegneserie",
+                  "Manga",
+                  "Daredevil",
+                  "Tintin",
+                  "Asterix og Obelix",
+                  "Batman",
+                  "Star Wars",
+                  "Superhero",
+                  "Graphic Novels",
+                  "Spider-Man",
+                  "Superman",
+                  "Fantasy",
+                  "Sci-Fi",
+                ].map((label) => (
+                  <button
+                    key={`tag-${label}`}
+                    type="button"
+                    onClick={() => {
+                      if (label === "Tegneserie") {
+                        toggleSet(setFormats, formats, "Tegneserie (hæfte)");
+                        setOpen((o) => ({ ...o, format: true }));
+                      } else if (
+                        [
+                          "Graphic Novel",
+                          "Manga",
+                          "Omnibus / Samlebind",
+                          "Hardcover",
+                          "Paperback",
+                        ].includes(label)
+                      ) {
+                        toggleSet(setFormats, formats, label);
+                        setOpen((o) => ({ ...o, format: true }));
+                      } else if (
+                        ["Superhero", "Sci-Fi", "Fantasy", "Horror"].includes(
+                          label
+                        )
+                      ) {
+                        toggleSet(setGenres, genres, label);
+                        setOpen((o) => ({ ...o, genre: true }));
+                      } else if (
+                        [
+                          "Tintin",
+                          "Asterix og Obelix",
+                          "Batman",
+                          "Daredevil",
+                          "Spider-Man",
+                          "Superman",
+                          "Star Wars",
+                        ].includes(label)
+                      ) {
+                        toggleSet(setSeries, series, label);
+                        setOpen((o) => ({ ...o, series: true }));
+                      } else {
+                        setQuery((q) => (q === label ? "" : label));
+                      }
+                    }}
+                    className={styles.tagPill}
+                    data-active={(() => {
+                      return (
+                        (label === "Tegneserie" &&
+                          formats.has("Tegneserie (hæfte)")) ||
+                        formats.has(label) ||
+                        genres.has(label) ||
+                        series.has(label) ||
+                        query === label
+                      );
+                    })()}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="h-px bg-neutral-800/80 my-2" />
-            {/* Price ranges (expandable) */}
-            <div className="mt-4">
-              <button
-                type="button"
-                className="w-full flex items-center justify-between text-left py-2.5 px-2 rounded hover:bg-neutral-850"
-                onClick={() => setExpandPrice((v) => !v)}
-                aria-expanded={expandPrice}
-                aria-controls="price-ranges"
-              >
-                <span className="font-geist font-bold text-sm uppercase tracking-wide text-neutral-300">
-                  Pris
-                </span>
-                <span className="text-neutral-400 text-xs">
-                  {expandPrice ? "▾" : "▸"}
-                </span>
-              </button>
-              {expandPrice && (
-                <div
-                  id="price-ranges"
-                  className="pt-2 space-y-2"
-                  role="group"
-                  aria-label="Priskategorier"
-                >
-                  {priceRanges.map((r) => (
-                    <label
-                      key={r.value}
-                      className="flex items-center gap-3 text-sm font-geist text-neutral-300"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={activePrices.has(r.value)}
-                        onChange={() =>
-                          toggleSet(setActivePrices, activePrices, r.value)
-                        }
-                        className="f-checkbox"
-                      />
-                      <span>{r.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+        {/* Results left, Sort right; aligned with products column */}
+        <div className={styles.resultsGridRow}>
+          <div className={styles.resultsSpacer} />
+          <div className={styles.resultsInner}>
+            <div className={styles.resultsCountLabel}>
+              <span>Resultater:</span>
+              <span className={styles.resultsCountValue}>
+                {filtered.length}
+              </span>
             </div>
-          </aside>
+            <div className={styles.selectedFilters}>
+              {selectedFilters.map((chip) => (
+                <span
+                  key={`${chip.type}-${chip.value}`}
+                  className={styles.filterChip}
+                >
+                  {chip.label}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${chip.label}`}
+                    className={styles.chipRemoveBtn}
+                    onClick={() => removeFilter(chip.typeKey, chip.value)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className={styles.sortBox}>
+              <label className={styles.sortLabel}>Sortér</label>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className={styles.sortSelect}
+              >
+                {sortOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
 
-          {/* Content */}
-          <section className="flex-1">
-            {/* Product grid */}
+        {/* Main grid: sidebar left, products right */}
+        <div className={styles.mainGridRow}>
+          {/* Sidebar */}
+          <div className={styles.sidebarCol}>
+            <FiltersPanel
+              formats={[
+                "Tegneserie (hæfte)",
+                "Graphic Novel",
+                "Manga",
+                "Omnibus / Samlebind",
+                "Hardcover",
+                "Paperback",
+              ]}
+              genres={[
+                "Superhero",
+                "Sci-Fi",
+                "Horror",
+                "Fantasy",
+                "Dark and gritty",
+                "Mystery",
+                "Adventure",
+              ]}
+              authors={authorOptions}
+              publishers={publisherOptions}
+              series={seriesOptions}
+              languages={["Dansk", "Engelsk", "Japansk"]}
+              priceRanges={priceRanges}
+              state={{
+                formats,
+                genres,
+                languages,
+                authors,
+                publishers,
+                series,
+                showAllGenres,
+                activePrices,
+                open,
+                setOpen,
+              }}
+              onToggle={(type, val) => {
+                const map = {
+                  formats: [formats, setFormats],
+                  genres: [genres, setGenres],
+                  languages: [languages, setLanguages],
+                  authors: [authors, setAuthors],
+                  publishers: [publishers, setPublishers],
+                  series: [series, setSeries],
+                };
+                const [set, setter] = map[type];
+                const next = new Set(set);
+                if (next.has(val)) next.delete(val);
+                else next.add(val);
+                setter(next);
+              }}
+              onTogglePrice={(val) =>
+                toggleSet(setActivePrices, activePrices, val)
+              }
+              onShowMoreGenres={() => setShowAllGenres((v) => !v)}
+              onReset={resetAll}
+            />
+          </div>
+
+          {/* Products */}
+          <section className={styles.productsSection}>
             {filtered.length === 0 ? (
-              <div className="text-center py-16 rounded-lg bg-neutral-900/60 ring-1 ring-neutral-800">
-                <div className="text-2xl font-geist font-bold mb-2">
-                  Ingen resultater
-                </div>
-                <div className="text-sm text-neutral-400">
-                  Prøv at justere dine filtre eller ryd alle.
+              <div className={styles.emptyBox}>
+                <div className={styles.emptyTitle}>Ingen resultater</div>
+                <div className={styles.emptyText}>
+                  Ingen produkter i databasen endnu. Tilføj en vare i Firestore,
+                  eller justér dine filtre.
                 </div>
                 <div className="mt-4">
                   <button
                     type="button"
                     onClick={resetAll}
-                    className="text-sm bg-neutral-800 hover:bg-neutral-700 rounded-md px-4 py-2 ring-1 ring-neutral-700/70"
+                    className={styles.emptyBtn}
                   >
                     Ryd alle filtre
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
+              <div className={styles.gridProducts}>
                 {filtered.map((p) => (
                   <ProductCard
                     key={p.id}
-                    image={p.image}
+                    image={p.image || null}
                     title={p.title}
                     author={p.author}
                     price={p.price}
-                    stock={"På lager"}
                   />
                 ))}
               </div>

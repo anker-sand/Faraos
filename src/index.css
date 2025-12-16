@@ -83,6 +83,13 @@
   scrollbar-color: #404040 #0a0a0a;
 }
 
+/* Ensure global dark background covers the whole document */
+html,
+body {
+  background-color: #0a0a0a; /* neutral-950 */
+  min-height: 100%;
+}
+
 /* Utility to fully hide scrollbars cross-browser */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
