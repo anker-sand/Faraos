@@ -6,4 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig(({ mode }) => ({
   base: mode === "production" ? "/Faraos/" : "/",
   plugins: [react(), tailwindcss()],
+  build: {
+    outDir: "docs", // Output directory for GitHub Pages
+  },
 }));
